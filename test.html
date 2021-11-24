@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+    <script src='zoomable.js'></script>
+</head>
+
+<body>
+    <div id='root'>
+        <h1>This is zoomable.js</h1>
+        <p>Its a Javascript library for creating zoomable user interfaces</p>
+
+        <div class='gallery'>
+            <div class='item zoomable'>
+                <h1>This is zoomable.js</h1>
+                <p>Its a Javascript library for creating zoomable user interfaces. Its a Javascript library for creating zoomable user interfaces</p>
+            </div>
+            <div class='item zoomable'>
+                <h1>This is zoomable.js</h1>
+                <p>Its a Javascript library for creating zoomable user interfaces</p>
+            </div>
+            <div class='item'>
+                <h1>Another Item</h1>
+            </div>
+        </div>
+    </div>
+</body>
+
+<style>
+
+html, body {
+    height: 100%;
+    margin: 0px;
+}
+
+
+body {
+    margin: 20px;
+}
+
+
+#root {
+    min-height: 100%;
+}
+
+.gallery {
+    width: 80vw;
+    height: 20vw;
+
+    display: flex;
+}
+
+.item {
+    flex: 1;
+}
+
+.a {
+    background: red;
+}
+
+.b {
+    background: blue;
+}
+
+.measuring {
+    display: inline-block;
+}
+
+</style>
+
+<script>
+    let root = document.querySelector('#root');
+
+    zoomable.setup(root);
+
+    let item = document.querySelector('.a');
+</script>
+
+</html>
