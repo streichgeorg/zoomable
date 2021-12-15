@@ -4,10 +4,8 @@ let zoomable = function() {
     let root = null;
 
     function measure_dimensions(elt) {
-        let rect = elt.getBoundingClientRect();
-        return [rect.width, rect.height];
+        return [elt.clientWidth, elt.clientHeight];
     }
-
 
     function setup(from) {
         root = from;
@@ -16,16 +14,22 @@ let zoomable = function() {
             let children = Array.from(element.childNodes).filter(child => child.nodeType == 1);
 
             // First transform the children of the element
-            if (element.querySelector('.zoomable')) children.forEach(transform_in);
+            if (element.querySelector('.zoomable') || element.querySelector('.zoomable-text')) {
+                children.forEach(transform_in);
+            }
 
             // Find directly descendant portals
-            let portals = children.filter(child => child.matches('.zoomable'));
+            let portals = children.filter(child => child.matches('.zoomable, .zoomable-text'));
             if (portals.length == 0) return;
 
             // Move all the children to their own container
             let containers = portals.map(portal => {
                 let container = document.createElement('div');
-                while (portal.childNodes.length) container.appendChild(portal.firstChild);
+                let inner = document.createElement('div');
+
+                while (portal.childNodes.length) inner.appendChild(portal.firstChild);
+
+                container.appendChild(inner);
 
                 return container;
             });
@@ -58,17 +62,41 @@ let zoomable = function() {
 
             // Readd scaled down version of the containers
             portals.forEach((portal, i) => {
-                let scale = 0.9 * Math.min(
-                    dim_empty[i][0] / dim_full[i][0],
-                    dim_empty[i][1] / dim_full[i][1]
+                let x_scale = dim_empty[i][0] / dim_full[i][0];
+                let y_scale = dim_empty[i][1] / dim_full[i][1];
+
+                let full_area = dim_full[i][0] * dim_full[i][1];
+
+                let scale = 0.9 * Math.sqrt(
+                    (dim_empty[i][0] * dim_empty[i][1]) /
+                    full_area
                 );
 
                 let container = containers[i];
+                let inner = container.firstChild;
 
-                container.style.setProperty('transform-origin', 'left top');
-                container.style.setProperty('transform', `scale(${scale})`);
+                container.style.setProperty('position', 'absolute');
+                container.style.setProperty('width', `${100 * x_scale / scale}%`);
+                container.style.setProperty('height', `${100 * y_scale / scale}%`);
+
+                if (portal.classList.contains('zoomable-text')) {
+                    console.log('text');
+                    let n_cols = Math.ceil(full_area / 6e5);
+                    inner.style.setProperty('column-count', `${n_cols}`);
+                }
+
+                inner.style.setProperty('top', '0');
+                inner.style.setProperty('left', '0');
+                inner.style.setProperty('transform-origin', 'left top');
+                inner.style.setProperty('transform', `scale(${scale})`);
 
                 portal.appendChild(container);
+            });
+
+
+            let pz_instance = panzoom(root, {zoomSpeed: 0.05});
+            pz_instance.on('zoomend', e => {
+                 
             });
         }
 
@@ -77,33 +105,8 @@ let zoomable = function() {
         root.style.setProperty('transform-origin', 'left top');
     }
 
-    function focus(elt) {
-        let dim_elt = measure_dimensions(elt);
-
-        // Important: clear root's transform before measuring root dimensions
-        root.style.setProperty('transform', '');
-        let dim_root = measure_dimensions(root);
-
-        let scale = Math.min(
-            dim_root[0] / dim_elt[0],
-            dim_root[1] / dim_elt[1]
-        );
-
-        let elt_rect = elt.getBoundingClientRect();
-
-        let transform_str = `scale(${scale}) translate(${-elt_rect.x}px, ${-elt_rect.y}px)`;
-        console.log(transform_str);
-        root.style.setProperty('transform', transform_str);
-    }
-
-    function reset_focus() {
-        root.style.setProperty('transform', '');
-    }
-
     return {
         'setup': setup,
-        'focus': focus,
-        'reset_focus': reset_focus,
     };
 }();
 
