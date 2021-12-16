@@ -2,9 +2,34 @@
 
 let zoomable = function() {
     let root = null;
+    let summaries = [];
 
     function measure_dimensions(elt) {
         return [elt.clientWidth, elt.clientHeight];
+    }
+
+    function get_overlap(elt) {
+        let rect = elt.getBoundingClientRect();
+
+        let l = Math.max(0.0, rect.left);
+        let t = Math.max(0.0, rect.top);
+        let r = Math.min(window.innerWidth, rect.right);
+        let b = Math.min(window.innerHeight, rect.bottom);
+
+        return (b - t) * (r - l) / (window.innerWidth * window.innerHeight);
+    }
+
+    function update_visibility() {
+        for (let summary of summaries) {
+            let overlap = get_overlap(summary.main.firstChild);
+            if (overlap < 0.1) {
+                summary.main.style.setProperty('visibility', 'hidden');
+                summary.summary.style.setProperty('visibility', '');
+            } else {
+                summary.main.style.setProperty('visibility', '');
+                summary.summary.style.setProperty('visibility', 'hidden');
+            }
+        }
     }
 
     function setup(from) {
@@ -24,23 +49,38 @@ let zoomable = function() {
 
             // Move all the children to their own container
             let containers = portals.map(portal => {
-                let container = document.createElement('div');
-                let inner = document.createElement('div');
+                let result = [];
 
-                while (portal.childNodes.length) inner.appendChild(portal.firstChild);
+                let main = document.createElement('div');
+                let main_inner = document.createElement('div');
 
-                container.appendChild(inner);
+                while (portal.childNodes.length) main_inner.appendChild(portal.firstChild);
+                main.appendChild(main_inner);
 
-                return container;
-            });
+                if (portal.querySelector('.zoomable-summary')) {
+                    let summary = portal.querySelector('.zoomable-summary');
+                    portal.insertBefore(summary, portal.firstChild);
+
+                    summaries.push({
+                        main: main,
+                        summary: summary
+                    });
+                }
+
+
+                result.push({portal: portal, container: main});
+
+                return result;
+            }).flat();
 
             // Measure the dimensions of the full portals
-            let dim_full = containers.map(container => {
+            let dim_full = containers.map(({portal, container}) => {
                 document.body.appendChild(container);
                 container.style.setProperty('display', 'inline-block');
                 let result = measure_dimensions(container);
                 container.style.setProperty('display', '');
                 document.body.removeChild(container);
+
                 return result;
             });
 
@@ -48,7 +88,7 @@ let zoomable = function() {
             portals.forEach((portal, i) => { portal.innerHTML = ''; });
 
             // Remeasure the dimensions of the empty portals
-            let dim_empty = portals.map(portal => {
+            let dim_empty = containers.map(({portal}) => {
                 let filler = document.createElement('div');
                 filler.style.setProperty('width', '100%');
                 filler.style.setProperty('height', '100%');
@@ -61,28 +101,38 @@ let zoomable = function() {
             });
 
             // Readd scaled down version of the containers
-            portals.forEach((portal, i) => {
+            containers.forEach(({portal, container}, i) => {
+                let inner = container.firstChild;
+
                 let x_scale = dim_empty[i][0] / dim_full[i][0];
                 let y_scale = dim_empty[i][1] / dim_full[i][1];
 
                 let full_area = dim_full[i][0] * dim_full[i][1];
 
-                let scale = 0.9 * Math.sqrt(
-                    (dim_empty[i][0] * dim_empty[i][1]) /
-                    full_area
+                container.style.setProperty('position', 'absolute');
+
+                let is_text = (
+                    portal.classList.contains('zoomable-text') &&
+                    !container.classList.contains('zoomable-summary')
                 );
 
-                let container = containers[i];
-                let inner = container.firstChild;
+                let scale;
+                if (is_text) {
+                    scale = 0.9 * Math.sqrt(
+                        (dim_empty[i][0] * dim_empty[i][1]) /
+                        full_area
+                    );
 
-                container.style.setProperty('position', 'absolute');
-                container.style.setProperty('width', `${100 * x_scale / scale}%`);
-                container.style.setProperty('height', `${100 * y_scale / scale}%`);
+                    container.style.setProperty('width', `${100 * x_scale / scale}%`);
+                    container.style.setProperty('height', `${100 * y_scale / scale}%`);
 
-                if (portal.classList.contains('zoomable-text')) {
-                    console.log('text');
-                    let n_cols = Math.ceil(full_area / 6e5);
+                    let n_cols = Math.ceil(full_area / 4e5);
                     inner.style.setProperty('column-count', `${n_cols}`);
+                } else {
+                    scale = Math.min(x_scale, y_scale);
+
+                    container.style.setProperty('width', `100%`);
+                    container.style.setProperty('height', `100%`);
                 }
 
                 inner.style.setProperty('top', '0');
@@ -93,11 +143,10 @@ let zoomable = function() {
                 portal.appendChild(container);
             });
 
+            // update_visibility();
 
             let pz_instance = panzoom(root, {zoomSpeed: 0.05});
-            pz_instance.on('zoomend', e => {
-                 
-            });
+            // pz_instance.on('transform', update_visibility);
         }
 
         transform_in(root);
