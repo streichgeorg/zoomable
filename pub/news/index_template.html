@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+    <script src='../zoomable.js'></script>
+    <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+</head>
+<body>
+    <div id='root'>
+        <div id='toc' class='zoomable' style='{{toc_rect}}'>
+            <div class='toc-inner'>
+                <h1>Contents</h1>
+                <div class='toc-list'>
+                    {% for article, rect in articles[:40] %}
+                    <div class='toc-item'>{{article.title}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% for article, rect in articles %}
+        <div class='article' style='{{rect}}'>
+            <div class='title zoomable-text'>
+                {{article.title}}
+            </div>
+            <div class='content zoomable-text'>
+                <div class='content-inner'>
+                    {{article.content}}
+                </div>
+            </div>
+            <div class='footer'></div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+<style>
+
+#root {
+    width: 1000px;
+    height: 1000px;
+
+    display: grid;
+    grid-template-columns: repeat(100, 1fr);
+    grid-template-rows: repeat(100, 1fr);
+}
+
+.article {
+    display: flex;
+    flex-direction: column;
+}
+
+.toc-inner {
+    padding: 40px;
+}
+
+.toc-list {
+    display: grid;
+    width: 1000px;
+    height: 1000px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    grid-column-gap: 5px;
+}
+
+.toc-item {
+    vertical-align: center;
+}
+
+.title {
+    flex: 1;
+    margin: 2px;
+}
+
+.content {
+    flex: 6;
+    margin: 2px;
+}
+
+.content-inner {
+    column-width: 200px;
+}
+
+.footer {
+    height: 1;
+}
+
+</style>
+
+<script>
+    window.onload = () => {
+        let root = document.querySelector('#root');
+        zoomable.setup(root);
+    };
+</script>
+</html>
