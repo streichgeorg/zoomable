@@ -52,6 +52,8 @@ let zoomable = function() {
                 let result = [];
 
                 let main = document.createElement('div');
+                main.style.setProperty('display', 'inline-block');
+
                 let main_inner = document.createElement('div');
 
                 while (portal.childNodes.length) main_inner.appendChild(portal.firstChild);
@@ -76,9 +78,7 @@ let zoomable = function() {
             // Measure the dimensions of the full portals
             let dim_full = containers.map(({portal, container}) => {
                 document.body.appendChild(container);
-                container.style.setProperty('display', 'inline-block');
                 let result = measure_dimensions(container);
-                container.style.setProperty('display', '');
                 document.body.removeChild(container);
 
                 return result;
@@ -100,6 +100,8 @@ let zoomable = function() {
                 return result;
             });
 
+            let dim_elt = measure_dimensions(element);
+
             // Readd scaled down version of the containers
             containers.forEach(({portal, container}, i) => {
                 let inner = container.firstChild;
@@ -118,21 +120,25 @@ let zoomable = function() {
 
                 let scale;
                 if (is_text) {
-                    scale = 0.9 * Math.sqrt(
+                    scale = 0.85 * Math.sqrt(
                         (dim_empty[i][0] * dim_empty[i][1]) /
                         full_area
                     );
 
-                    container.style.setProperty('width', `${100 * x_scale / scale}%`);
-                    container.style.setProperty('height', `${100 * y_scale / scale}%`);
+                    let r = dim_empty[i][0] / dim_empty[i][1];
+                    let width = Math.sqrt(r * full_area);
+                    let alpha = width / dim_elt[0];
+
+                    container.style.setProperty('width', `${100 * alpha}%`);
+                    container.style.setProperty('height', '100%');
 
                     let n_cols = Math.ceil(full_area / 4e5);
                     inner.style.setProperty('column-count', `${n_cols}`);
                 } else {
                     scale = Math.min(x_scale, y_scale);
 
-                    container.style.setProperty('width', `100%`);
-                    container.style.setProperty('height', `100%`);
+                    container.style.setProperty('width', '100%');
+                    container.style.setProperty('height', '100%');
                 }
 
                 inner.style.setProperty('top', '0');
