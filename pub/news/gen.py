@@ -1,16 +1,13 @@
 #!/usr/bin/python
 
-import pandas as pd
 from jinja2 import Template
 
-from random import random
+from random import random, randint
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-df = pd.read_csv('articles1.csv', index_col='Unnamed: 0')
-df = df[df['publication'] != 'Breitbart']
-df = df[(1000 <= df['content'].str.len()) & (df['content'].str.len() < 6000)]
+from collections import namedtuple
 
 def subdivision(i, j, w, h, level=0):
     leaf = (w == 1 and h == 1) or (level > 2 and random() < 0.35)
@@ -43,15 +40,17 @@ sd.sort(key=lambda s: s[2] * s[3])
 toc_rect = sd[-51]
 sd = sd[-50:]
 
-toc_rect = (toc_rect[0], toc_rect[1], min(toc_rect[2], toc_rect[3]), min(toc_rect[2], toc_rect[3]))
+article = namedtuple('article', 'title content')
 
-df = df.sample(n=len(sd), replace=False, random_state=2)
-df = df.sort_values(by="content", key=lambda x: x.str.len())
+lorem_ipsum = '''
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque commodo in neque eget eleifend. Nam eu nisi et mauris sagittis pulvinar non vitae sapien. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur justo ante, fermentum et tellus quis, ullamcorper aliquet tortor. In sit amet nunc sit amet neque facilisis tincidunt at vitae justo. Cras sodales nunc sit amet orci cursus, sed sodales sem fringilla. Morbi purus leo, commodo et ligula sed, finibus iaculis orci. Donec nec ultrices nisi. Aliquam ut congue risus. Etiam fringilla ligula fringilla, commodo magna a, dapibus metus. Maecenas laoreet interdum lorem eget gravida. Ut efficitur lacus eget nibh condimentum facilisis. In hac habitasse platea dictumst. Ut non turpis finibus, consequat dui eget, maximus elit. Maecenas eget convallis diam. Praesent tellus velit, sodales eu mi non, lacinia laoreet tortor. 
+'''
 
-articles = list(zip(df.itertuples(), map(to_style, sd)))
+articles = [article('Title', (1 + randint(1, 5)) * lorem_ipsum) for i in range(100)]
+
+articles = list(zip(articles, map(to_style, sd)))
 
 template = Template(open('index_template.html').read());
 open('index.html', 'w').write(template.render(
-    toc_rect=to_style(toc_rect),
     articles=articles
 ))

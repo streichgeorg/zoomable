@@ -7,17 +7,6 @@
 </head>
 <body>
     <div id='root'>
-        <div id='toc' class='zoomable' style='{{toc_rect}}'>
-            <div class='toc-inner'>
-                <h1>Contents</h1>
-                <div class='toc-list'>
-                    {% for article, rect in articles[:40] %}
-                    <div class='toc-item'>{{article.title}}</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
         {% for article, rect in articles %}
         <div class='article' style='{{rect}}'>
             <div class='title zoomable-text'>
