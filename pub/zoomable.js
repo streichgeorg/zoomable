@@ -117,6 +117,7 @@ const zoomable = function() {
         const buildf = prepare_build(root);
         buildf();
 
+        // Use the panzoom library to implement panning, zooming https://github.com/anvaka/panzoom
         pz_instance = panzoom(root, {zoomSpeed: 0.05});
     }
 
