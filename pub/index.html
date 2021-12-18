@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+    <script src='zoomable.js'></script>
+    <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
+</head>
+
+<body>
+    <div id='root'>
+        <h1>Zoomable.js</h1>
+        <div class='gallery'>
+            <div class='item zoomable'>
+                <h1>Zoomable.js</h1>
+                <p>It's a javascript library for creating zoomable user interfaces. It's a javascript library for creating zoomable user interfaces. It's a javascript library for creating zoomable user interfaces. It's a javascript library for creating zoomable user interfaces.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+<style>
+
+.gallery {
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+}
+
+.item {
+    flex: 1;
+    margin: 10px;
+}
+
+.measuring {
+    display: inline-block;
+}
+
+</style>
+
+<script>
+    window.onload = () => {
+        let root = document.querySelector('#root');
+        zoomable.setup(root);
+    };
+</script>
+
+</html>
