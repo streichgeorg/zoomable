@@ -2,47 +2,34 @@
 <html lang=en>
 <head>
 <meta charset=utf-8>
-    <script src='zoomable.js'></script>
+    <script src='./zoomable.js'></script>
     <script src='https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js'></script>
 </head>
 
 <body>
     <div id='root'>
         <h1>Zoomable.js</h1>
-        <div class='gallery'>
-            <div class='item zoomable'>
-                <h1>Zoomable.js</h1>
-                <p>It's a javascript library for creating zoomable user interfaces. It's a javascript library for creating zoomable user interfaces. It's a javascript library for creating zoomable user interfaces. It's a javascript library for creating zoomable user interfaces.</p>
-            </div>
-        </div>
+        It's a javascript library that lets developers create zoomables user interfaces while writing normal HTML. An example how the library could be used (in this case for a newspaper website) can be found <a href='./news/index.html'>here</a>.
+        <h2>Interface</h2>
+        The main way the developer interacts with the library is through the special <code>zoomable</code> css classes, which specify the layout mode that should be used for that element. Children of elements tagged with such a class are then scaled to fit into the parent element in a setup step. The library itself then provides two methods, the first one is <code>setup</code> which when passed an element transforms all the tagged elements. The other method that is provided is <code>focus</code> which given the id of an element focusses it.
+        <h2>Layout Modes</h2>
+        Currently there are two layout modes implemented. The class <code>zoomable</code> indicates the normal layout mode which just scales down the element so that it fits in both the vertical and horizontal dimension. The second mode that can be used is the text layout mode indicated by the class <code>zoomable-text</code>. This assumes that the content inside the element can reflow in an area preserving way when the aspect ratio changes.
     </div>
 </body>
-
 <style>
 
-.gallery {
-    width: 100vw;
-    height: 100vh;
-
-    display: flex;
-}
-
-.item {
-    flex: 1;
-    margin: 10px;
-}
-
-.measuring {
-    display: inline-block;
+#root {
+    padding: 20px;
+    width: 1000px;
 }
 
 </style>
 
 <script>
-    window.onload = () => {
-        let root = document.querySelector('#root');
-        zoomable.setup(root);
-    };
+window.onload = () => {
+    let root = document.querySelector('#root');
+    zoomable.setup(root);
+};
 </script>
 
 </html>
